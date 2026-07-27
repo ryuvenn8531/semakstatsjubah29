@@ -18,7 +18,7 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1QqTOt7yCjDXvDbUhZqWG1MbrH-l
 
 # 3. Connect and fetch data directly using the URL
 conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4], ttl="5m")
+df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4], ttl="10m")
 
 # 4. Clean column names
 df.columns = ["KAMPUS", "SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA"]
