@@ -13,85 +13,93 @@ st.title("🎓 STATISTIK PENGAMBILAN JUBAH ISTIADAT KONVOKESYEN ADTEC JTM KALI K
 st.caption("Dashboard statistik pengambilan jubah")
 st.divider()
 
-# 2. Paste your Google Sheet URL here
+# 2. Google Sheet URL
 sheet_url = "https://docs.google.com/spreadsheets/d/1QqTOt7yCjDXvDbUhZqWG1MbrH-lbFRAZ7aQ70qOxSGw/edit?gid=1445201158#gid=1445201158"
 
-# 3. Connect and fetch data directly using the URL
+# 3. Connect to Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
-# 2. Wrap the display logic inside a Fragment that updates automatically
-# "10m" (or 600 seconds) tells Streamlit to automatically rerun this block every 10 mins
+
+# 4. Wrap the display logic in a fragment (Auto-refresh every 10 minutes)
 @st.fragment(run_every="10m")
 def load_and_display_data():
-    # Force TTL=0 here so that whenever the 10-minute auto-refresh triggers,
-    # it fetches fresh data directly from Google Sheets instead of reading cache
+    # Read data cleanly
     df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4], ttl=0)
 
-# 4. Clean column names
-df.columns = ["KAMPUS", "SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA"]
-df = df.dropna(subset=["KAMPUS"])
+    # Clean column names
+    df.columns = ["KAMPUS", "SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA"]
+    df = df.dropna(subset=["KAMPUS"])
 
-# Convert numeric columns safely
-numeric_cols = ["SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA"]
-for col in numeric_cols:
-    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+    # Convert numeric columns safely
+    numeric_cols = ["SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA"]
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-# Calculate percentage of Column D (JDA) over Column E (JBA)
-df["JDA_PERCENT"] = (df["JDA"] / df["JBA"]).fillna(0) * 100
+    # Calculate percentage of Column D (JDA) over Column E (JBA)
+    df["JDA_PERCENT"] = (df["JDA"] / df["JBA"]).fillna(0) * 100
 
-# 5. Top Metrics Display
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Setuju Hadir", f"{int(df['SETUJU_HADIR'].sum()):,}")
-col2.metric("Total Tidak Hadir", f"{int(df['TIDAK_HADIR'].sum()):,}")
-col3.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
-col4.metric("Total Jubah Belum Diambil", f"{int(df['JBA'].sum()):,}")
+    # 5. Top Metrics Display
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Setuju Hadir", f"{int(df['SETUJU_HADIR'].sum()):,}")
+    col2.metric("Total Tidak Hadir", f"{int(df['TIDAK_HADIR'].sum()):,}")
+    col3.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
+    col4.metric("Total Jubah Belum Diambil", f"{int(df['JBA'].sum()):,}")
 
-st.divider()
+    st.divider()
 
-# 6. Center-aligned HTML Table display
-st.subheader("Jumlah Mengikut Kampus")
+    # 6. Center-aligned HTML Table display
+    st.subheader("Jumlah Mengikut Kampus")
 
-# Prepare display dataframe
-df_display = df.copy()
+    # Prepare display dataframe
+    df_display = df.copy()
 
-# Format numbers nicely
-df_display["SETUJU_HADIR"] = df_display["SETUJU_HADIR"].apply(lambda x: f"{int(x):,}")
-df_display["TIDAK_HADIR"] = df_display["TIDAK_HADIR"].apply(lambda x: f"{int(x):,}")
-df_display["JDA"] = df_display["JDA"].apply(lambda x: f"{int(x):,}")
-df_display["JBA"] = df_display["JBA"].apply(lambda x: f"{int(x):,}")
-df_display["JDA_PERCENT"] = df_display["JDA_PERCENT"].apply(lambda x: f"{x:.2f}%")
+    # Format numbers nicely
+    df_display["SETUJU_HADIR"] = df_display["SETUJU_HADIR"].apply(lambda x: f"{int(x):,}")
+    df_display["TIDAK_HADIR"] = df_display["TIDAK_HADIR"].apply(lambda x: f"{int(x):,}")
+    df_display["JDA"] = df_display["JDA"].apply(lambda x: f"{int(x):,}")
+    df_display["JBA"] = df_display["JBA"].apply(lambda x: f"{int(x):,}")
+    df_display["JDA_PERCENT"] = df_display["JDA_PERCENT"].apply(lambda x: f"{x:.2f}%")
 
-# Rename column headers
-df_display = df_display.rename(columns={
-    "KAMPUS": "Kampus / Location",
-    "SETUJU_HADIR": "Setuju Hadir",
-    "TIDAK_HADIR": "Tidak Hadir",
-    "JDA": "Jubah Telah Diambil",
-    "JBA": "Jubah Belum Diambil",
-    "JDA_PERCENT": "Selesai Ambil Jubah"
-})
+    # Rename column headers
+    df_display = df_display.rename(columns={
+        "KAMPUS": "Kampus / Location",
+        "SETUJU_HADIR": "Setuju Hadir",
+        "TIDAK_HADIR": "Tidak Hadir",
+        "JDA": "Jubah Telah Diambil",
+        "JBA": "Jubah Belum Diambil",
+        "JDA_PERCENT": "Selesai Ambil Jubah"
+    })
 
-# Hide index row numbers (no more 0, 1, 2...) and center all contents via HTML
-html_table = df_display.to_html(index=False, classes="custom-centered-table")
+    # Hide index row numbers and wrap in responsive/centered HTML
+    raw_table = df_display.to_html(index=False, classes="custom-centered-table")
 
-# Inject styling that forces every header and cell to center align
-st.markdown("""
-    <style>
-    .custom-centered-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    .custom-centered-table th, .custom-centered-table td {
-        text-align: center !important;
-        padding: 10px;
-        border: 1px solid #e6e6e6;
-    }
-    .custom-centered-table th {
-        background-color: #f0f2f6;
-        font-weight: bold;
-    }
-    </style>
-""", unsafe_allow_html=True)
+    st.markdown(f"""
+        <style>
+        .table-container {{
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 10px;
+        }}
+        .custom-centered-table {{
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+        }}
+        .custom-centered-table th, .custom-centered-table td {{
+            text-align: center !important;
+            padding: 12px 8px;
+            border: 1px solid #e6e6e6;
+            font-size: 0.95rem;
+        }}
+        .custom-centered-table th {{
+            background-color: #f0f2f6;
+            font-weight: bold;
+        }}
+        </style>
+        <div class="table-container">
+            {raw_table}
+        </div>
+    """, unsafe_allow_html=True)
 
-# Render centered table
-st.markdown(html_table, unsafe_allow_html=True)
+# 7. Call the fragment function to execute
+load_and_display_data()
