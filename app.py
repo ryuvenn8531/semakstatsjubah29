@@ -46,7 +46,7 @@ def load_and_display_data():
 
     st.divider()
 
-    # 6. Center-aligned HTML Table display
+# 6. Center-aligned HTML Table display
     st.subheader("Jumlah Mengikut Kampus")
 
     # Prepare display dataframe
@@ -69,37 +69,38 @@ def load_and_display_data():
         "JDA_PERCENT": "Selesai Ambil Jubah"
     })
 
-    # Hide index row numbers and wrap in responsive/centered HTML
+    # Generate raw HTML table
     raw_table = df_display.to_html(index=False, classes="custom-centered-table")
 
-    st.markdown(f"""
-        <style>
-        .table-container {{
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 10px;
-        }}
-        .custom-centered-table {{
-            width: 100%;
-            min-width: 600px;
-            border-collapse: collapse;
-        }}
-        .custom-centered-table th, .custom-centered-table td {{
-            text-align: center !important;
-            padding: 12px 8px;
-            border: 1px solid #e6e6e6;
-            font-size: 0.95rem;
-        }}
-        .custom-centered-table th {{
-            background-color: #f0f2f6;
-            font-weight: bold;
-        }}
-        </style>
-        <div class="table-container">
-            {raw_table}
-        </div>
-    """, unsafe_allow_html=True)
+    # Single HTML string containing both style and table markup
+    full_html = f"""
+    <style>
+    .table-container {{
+        width: 100%;
+        overflow-x: auto;
+        margin-top: 10px;
+    }}
+    .custom-centered-table {{
+        width: 100%;
+        border-collapse: collapse;
+    }}
+    .custom-centered-table th, .custom-centered-table td {{
+        text-align: center !important;
+        padding: 10px;
+        border: 1px solid #e6e6e6;
+    }}
+    .custom-centered-table th {{
+        background-color: #f0f2f6;
+        font-weight: bold;
+    }}
+    </style>
+    <div class="table-container">
+        {raw_table}
+    </div>
+    """
+
+    # Render table properly
+    st.markdown(full_html, unsafe_allow_html=True)
 
 # 7. Call the fragment function to execute
 load_and_display_data()
