@@ -2,21 +2,21 @@ import streamlit as st
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
 
-# 1. Page branding and responsive wide layout
+# 1. Page branding
 st.set_page_config(
-    page_title="jubahstats",
+    page_title="STATISTIK PENGAMBILAN JUBAH ISTIADAT KONVOKESYEN ADTEC JTM KALI KE-29 (WILAYAH TENGAH)",
     page_icon="🎓",
-    layout="wide"  # Automatically fills available browser width
+    layout="wide"
 )
 
-st.title("🎓 jubahstats")
-st.caption("Real-time attendance & graduation gown metrics dashboard")
+st.title("🎓 STATISTIK PENGAMBILAN JUBAH ISTIADAT KONVOKESYEN ADTEC JTM KALI KE-29 (WILAYAH TENGAH)")
+st.caption("Dashboard statistik pengambilan jubah")
 st.divider()
 
 # 2. Paste your Google Sheet URL here
-sheet_url = "PASTE_YOUR_PUBLIC_GOOGLE_SHEET_URL_HERE"
+sheet_url = "https://docs.google.com/spreadsheets/d/1QqTOt7yCjDXvDbUhZqWG1MbrH-lbFRAZ7aQ70qOxSGw/edit?gid=1445201158#gid=1445201158"
 
-# 3. Connect and fetch data with 10-minute cache TTL
+# 3. Connect and fetch data directly using the URL
 conn = st.connection("gsheets", type=GSheetsConnection)
 df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4], ttl="10m")
 
@@ -32,70 +32,60 @@ for col in numeric_cols:
 # Calculate percentage of Column D (JDA) over Column E (JBA)
 df["JDA_PERCENT"] = (df["JDA"] / df["JBA"]).fillna(0) * 100
 
-# 5. Responsive Metric Summary Cards
-col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+# 5. Top Metrics Display
+col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Setuju Hadir", f"{int(df['SETUJU_HADIR'].sum()):,}")
 col2.metric("Total Tidak Hadir", f"{int(df['TIDAK_HADIR'].sum()):,}")
-col3.metric("Total JDA", f"{int(df['JDA'].sum()):,}")
-col4.metric("Total JBA", f"{int(df['JBA'].sum()):,}")
+col3.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
+col4.metric("Total Jubah Belum Diambil", f"{int(df['JBA'].sum()):,}")
 
 st.divider()
 
-# 6. Responsive HTML Table Display
-st.subheader("Campus Breakdowns")
+# 6. Center-aligned HTML Table display
+st.subheader("Jumlah Mengikut Kampus")
 
+# Prepare display dataframe
 df_display = df.copy()
 
-# Format values cleanly
+# Format numbers nicely
 df_display["SETUJU_HADIR"] = df_display["SETUJU_HADIR"].apply(lambda x: f"{int(x):,}")
 df_display["TIDAK_HADIR"] = df_display["TIDAK_HADIR"].apply(lambda x: f"{int(x):,}")
 df_display["JDA"] = df_display["JDA"].apply(lambda x: f"{int(x):,}")
 df_display["JBA"] = df_display["JBA"].apply(lambda x: f"{int(x):,}")
 df_display["JDA_PERCENT"] = df_display["JDA_PERCENT"].apply(lambda x: f"{x:.2f}%")
 
+# Rename column headers
 df_display = df_display.rename(columns={
     "KAMPUS": "Kampus / Location",
     "SETUJU_HADIR": "Setuju Hadir",
     "TIDAK_HADIR": "Tidak Hadir",
-    "JDA": "JDA",
-    "JBA": "JBA",
-    "JDA_PERCENT": "% JDA / JBA"
+    "JDA": "Jubah Telah Diambil",
+    "JBA": "Jubah Belum Diambil",
+    "JDA_PERCENT": "Selesai Ambil Jubah"
 })
 
-# Generate clean centered HTML table without row index
-raw_table = df_display.to_html(index=False, classes="responsive-table")
+# Hide index row numbers (no more 0, 1, 2...) and center all contents via HTML
+html_table = df_display.to_html(index=False, classes="custom-centered-table")
 
-# Responsive CSS Wrapper
-st.markdown(f"""
+# Inject styling that forces every header and cell to center align
+st.markdown("""
     <style>
-    /* Allows horizontal scrolling on small screens without breaking text layout */
-    .table-container {{
+    .custom-centered-table {
         width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-top: 10px;
-    }}
-    
-    .responsive-table {{
-        width: 100%;
-        min-width: 600px; /* Prevents cell cramping on small screens */
         border-collapse: collapse;
-    }}
-    
-    .responsive-table th, .responsive-table td {{
+        margin-top: 10px;
+    }
+    .custom-centered-table th, .custom-centered-table td {
         text-align: center !important;
-        padding: 12px 8px;
+        padding: 10px;
         border: 1px solid #e6e6e6;
-        font-size: 0.95rem;
-    }}
-    
-    .responsive-table th {{
+    }
+    .custom-centered-table th {
         background-color: #f0f2f6;
-        font-weight: 600;
-    }}
+        font-weight: bold;
+    }
     </style>
-    
-    <div class="table-container">
-        {raw_table}
-    </div>
 """, unsafe_allow_html=True)
+
+# Render centered table
+st.markdown(html_table, unsafe_allow_html=True)
