@@ -18,7 +18,13 @@ sheet_url = "https://docs.google.com/spreadsheets/d/1QqTOt7yCjDXvDbUhZqWG1MbrH-l
 
 # 3. Connect and fetch data directly using the URL
 conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4], ttl="60")
+# 2. Wrap the display logic inside a Fragment that updates automatically
+# "10m" (or 600 seconds) tells Streamlit to automatically rerun this block every 10 mins
+@st.fragment(run_every="10m")
+def load_and_display_data():
+    # Force TTL=0 here so that whenever the 10-minute auto-refresh triggers,
+    # it fetches fresh data directly from Google Sheets instead of reading cache
+    df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4], ttl=0)
 
 # 4. Clean column names
 df.columns = ["KAMPUS", "SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA"]
