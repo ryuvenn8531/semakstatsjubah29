@@ -32,7 +32,7 @@ def load_and_display_data():
     for col in numeric_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
-    df["JDA_PERCENT"] = (df["JDA"] / df["JBA"]).fillna(0) * 100
+    df["JDA_PERCENT"] = (df["JDA"] / df["SETUJU_HADIR"]).fillna(0) * 100
 
     # 5. Top KPI Display
     col1, col2, col3, col4 = st.columns(4)
