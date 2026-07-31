@@ -22,7 +22,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # 4. Auto-refresh every 10 minutes via Fragment
 @st.fragment(run_every="10m")
 def load_and_display_data():
-    df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4, 5], ttl=0)
+    df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 3, 4, 5], ttl=0)
 
     # Clean column names
     df.columns = ["KAMPUS", "SETUJU_HADIR", "JDA", "JBA", "JDH"]
@@ -36,7 +36,7 @@ def load_and_display_data():
     df["JDH_PERCENT"] = (df["JDH"] / df["JDA"]).fillna(0) * 100
 
     # 5. Top KPI Display
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Setuju Hadir", f"{int(df['SETUJU_HADIR'].sum()):,}")
     col2.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
     col3.metric("Total Jubah Belum Diambil", f"{int(df['JBA'].sum()):,}")
