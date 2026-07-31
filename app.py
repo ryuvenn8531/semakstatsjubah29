@@ -28,7 +28,7 @@ def load_and_display_data():
     df.columns = ["KAMPUS", "SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA", "JDH"]
     df = df.dropna(subset=["KAMPUS"])
 
-    numeric_cols = ["SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA", JDH"]
+    numeric_cols = ["SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA", "JDH"]
     for col in numeric_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
