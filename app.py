@@ -25,10 +25,10 @@ def load_and_display_data():
     df = conn.read(spreadsheet=sheet_url, worksheet=0, usecols=[0, 1, 2, 3, 4, 5], ttl=0)
 
     # Clean column names
-    df.columns = ["KAMPUS", "SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA", "JDH"]
+    df.columns = ["KAMPUS", "SETUJU_HADIR", "JDA", "JBA", "JDH"]
     df = df.dropna(subset=["KAMPUS"])
 
-    numeric_cols = ["SETUJU_HADIR", "TIDAK_HADIR", "JDA", "JBA", "JDH"]
+    numeric_cols = ["SETUJU_HADIR", "JDA", "JBA", "JDH"]
     for col in numeric_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
@@ -38,10 +38,9 @@ def load_and_display_data():
     # 5. Top KPI Display
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Total Setuju Hadir", f"{int(df['SETUJU_HADIR'].sum()):,}")
-    col2.metric("Total Tidak Hadir", f"{int(df['TIDAK_HADIR'].sum()):,}")
-    col3.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
-    col4.metric("Total Jubah Belum Diambil", f"{int(df['JBA'].sum()):,}")
-    col5.metric("Total Jubah Telah Dipulangkan", f"{int(df['JDH'].sum()):,}")
+    col2.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
+    col3.metric("Total Jubah Belum Diambil", f"{int(df['JBA'].sum()):,}")
+    col4.metric("Total Jubah Telah Dipulangkan", f"{int(df['JDH'].sum()):,}")
 
     st.divider()
 
@@ -50,7 +49,6 @@ def load_and_display_data():
 
     df_display = df.copy()
     df_display["SETUJU_HADIR"] = df_display["SETUJU_HADIR"].apply(lambda x: f"{int(x):,}")
-    df_display["TIDAK_HADIR"] = df_display["TIDAK_HADIR"].apply(lambda x: f"{int(x):,}")
     df_display["JDA"] = df_display["JDA"].apply(lambda x: f"{int(x):,}")
     df_display["JBA"] = df_display["JBA"].apply(lambda x: f"{int(x):,}")
     df_display["JDA_PERCENT"] = df_display["JDA_PERCENT"].apply(lambda x: f"{x:.2f}%")
@@ -59,7 +57,6 @@ def load_and_display_data():
     df_display = df_display.rename(columns={
         "KAMPUS": "Kampus / Location",
         "SETUJU_HADIR": "Setuju Hadir",
-        "TIDAK_HADIR": "Tidak Hadir",
         "JDA": "Jubah Telah Diambil",
         "JBA": "Jubah Belum Diambil",
         "JDA_PERCENT": "Selesai Ambil Jubah",
