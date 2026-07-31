@@ -36,7 +36,7 @@ def load_and_display_data():
     df["JDH_PERCENT"] = (df["JDH"] / df["JDA"]).fillna(0) * 100
 
     # 5. Top KPI Display
-    col1, col2, col3, col4 = st.columns(5)
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("Total Setuju Hadir", f"{int(df['SETUJU_HADIR'].sum()):,}")
     col2.metric("Total Tidak Hadir", f"{int(df['TIDAK_HADIR'].sum()):,}")
     col3.metric("Total Jubah Telah Diambil", f"{int(df['JDA'].sum()):,}")
