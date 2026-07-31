@@ -59,6 +59,7 @@ def load_and_display_data():
         "SETUJU_HADIR": "Setuju Hadir",
         "JDA": "Jubah Telah Diambil",
         "JBA": "Jubah Belum Diambil",
+        "JDH": "Jubah Telah Dipulangkan",
         "JDA_PERCENT": "Selesai Ambil Jubah",
         "JDH_PERCENT": "Selesai Pulang Jubah"
     })
